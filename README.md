@@ -32,7 +32,7 @@ labels =numbered_Labels
 ``` 
 
 ## PDF examples
-![alt text](https://github.com/Kovenda/CNN-PDF-Noise-Classification/blob/main/images-and-plots/pdf1.png?raw=true)
+![alt text](https://github.com/Kovenda/CNN-PDF-Noise-Classification/blob/main/pdf1.png?raw=true)
 
 # Train Test Split
 from sklearn.model_selection import train_test_split
