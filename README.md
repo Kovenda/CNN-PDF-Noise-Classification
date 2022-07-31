@@ -35,12 +35,122 @@ labels =numbered_Labels
 ![alt text](https://github.com/Kovenda/CNN-PDF-Noise-Classification/blob/main/pdf1.png?raw=true)
 
 # Train Test Split
+``` {.python}
 from sklearn.model_selection import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+``` 
 
 # Model Building
 ``` {.python}
+num_classes = 5
+input_shape=(5, 1000, 760,1)
+model = Sequential([
+  layers.Conv2D(16, 3, padding='same', activation='relu', input_shape=input_shape[1:]),
+  layers.MaxPooling2D(),
+  layers.Conv2D(32, 3, padding='same', activation='relu'),
+  layers.MaxPooling2D(),
+  layers.Conv2D(64, 3, padding='same', activation='relu'),
+  layers.MaxPooling2D(),
+  layers.Flatten(),
+  layers.Dense(128, activation='relu'),
+  layers.Dense(num_classes)
+])
+
+model.compile(optimizer='adam',
+              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+              metrics=['accuracy'])
 ``` 
+
+## Fit Training Set
+``` {.python}
+model.fit(X_train_scaled, y_train, epochs=30) 
+``` 
+|Epoch|Accuracy|
+| 1 | 0.2634 |
+| 7 | 0.7737 |
+| 11 | 0.9918 |
+| 15 | 1.0000 |
+| 30 | 1.0000 |
+
+## Fit Test Set
+``` {.python}
+model.evaluate(X_test_scaled,y_test)
+``` 
+**accuracy:** 0.3537
+
+## Add Data Augmentation
+``` {.python}
+data_augmentation = keras.Sequential(
+  [
+    layers.experimental.preprocessing.RandomFlip("horizontal", 
+                                                 input_shape=(1000, 
+                                                              760,
+                                                              1)),
+    layers.experimental.preprocessing.RandomRotation(0.1),
+    layers.experimental.preprocessing.RandomZoom(0.1),
+  ]
+)
+``` 
+
+## Rebuild Model with Data Augmentation
+
+``` {.python}
+num_classes = 5
+input_shape=(5, 1000, 760,1)
+
+model2 = Sequential([
+  data_augmentation,
+
+  #Convolutional Network
+  layers.Conv2D(16, 3, padding='same', activation='relu', input_shape=input_shape[1:]),
+  layers.MaxPooling2D(),
+
+  layers.Conv2D(32, 3, padding='same', activation='relu'),
+  layers.MaxPooling2D(),
+
+  layers.Conv2D(64, 3, padding='same', activation='relu'),
+  layers.MaxPooling2D(),
+
+  layers.Dropout(0.2),
+
+  layers.Conv2D(16, 3, padding='same', activation='relu',),
+  layers.MaxPooling2D(),
+
+  layers.Conv2D(32, 3, padding='same', activation='relu'),
+  layers.MaxPooling2D(),
+
+  layers.Conv2D(64, 3, padding='same', activation='relu'),
+  layers.MaxPooling2D(),
+
+  #Dense network
+  layers.Flatten(),
+  layers.Dense(5000, activation='sigmoid'),
+  layers.Dense(500, activation='sigmoid'),
+  layers.Dense(50, activation='sigmoid'),
+  layers.Dense(num_classes,activation='softmax' )
+])
+
+model2.compile(optimizer='SGD',
+              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+              metrics=['accuracy'])
+``` 
+
+## ReFit Training Set
+``` {.python}
+model2.fit(X_train_scaled, y_train, epochs=500) 
+``` 
+|Epoch|Accuracy|
+| 1 | 0.1152 |
+| 2 | 0.2510|
+| 3 | 0.3292 |
+| 300 | 0.3292 |
+| 500 | 0.3292 |
+
+## Refit Test Set
+``` {.python}
+model2.evaluate(X_test_scaled,y_test)
+``` 
+**accuracy:** 0.4268
 
 
 
